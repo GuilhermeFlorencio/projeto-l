@@ -8,7 +8,7 @@ cursor = con.cursor()
 #cadastro de pesquisador, inicialmente chamado no código de user
 
 def create_usertable():
-    cursor.execute('CREATE TABLE IF NOT EXISTS pesquisador(nome TEXT,senha TEXT,ocupacao TEXT, cpf NUMERIC UNIQUE, situacao TEXT)')
+    cursor.execute('CREATE TABLE IF NOT EXISTS pesquisador(nome TEXT,senha TEXT,ocupacao TEXT, cpf NUMERIC UNIQUE, situacao TEXT UNIQUE)')
 
 
 def add_userdata(nome, senha, ocupacao, cpf,situacao):
@@ -194,3 +194,52 @@ elif paginaSelecionada == 'Cadastro presidente':
         add_presidente(input_name, input_senha)
         st.success('Adicionado com sucesso !!')
         st.info("Vá para o menu de login!!")
+
+
+#login do pesquisador
+
+elif paginaSelecionada == 'Área do Pesquisador':
+    st.sidebar.title("Login Pesquisador")
+    funcionarios = st.sidebar.selectbox('Selecione o caminho', ['Login', 'Cadastro'])
+
+    if funcionarios == 'Login':
+        nome = st.sidebar.text_input('Insira seu nome')
+        senha = st.sidebar.text_input('Insira a senha', type='password')
+        situacao = st.sidebar.selectbox('Situação ?', ['aprovado'])
+        if st.sidebar.checkbox('Login'):
+            # if input_senha_func == '1234':
+            create_usertable()
+            result = login_user(nome, senha,situacao)
+            if result:
+
+                st.sidebar.title(f"Logado como: {nome}")
+                st.title(f'Bem vindo de Volta {nome}')
+
+            else:
+                st.warning("Usuário incorreto ou Não Aprovado")
+            menu = st.selectbox('Escolha a função',['Emitir Protocolo','Receber Protocolo', 'Recomendar Protocolo'])
+            if menu == 'Emitir Protocolo':
+                st.title('Emitir Protocolo')
+                input_justificativa = st.text_input(label='Insira a Justificativa')
+                input_resumopt = st.text_input(label='Insira o resumo do trabalho em português')
+                input_resumoig = st.text_input(label= 'Insira o resumo do trabalho em inglês')
+                input_datainicio = st.text_input(label='Insira a data prevista para o inicio do experimento:')
+                input_dataterm = st.text_input(label='Insira a data prevista para o termino do experimento:')
+                input_especie = st.text_input(label='Insira a especie do animal')
+                input_qntanimal = st.text_input(label= 'Insira a quantidade de animais')
+                input_bioterio = st.tect_input(label= 'Insira o bioterio' )
+                input_experimento = st.tect_input(label= 'Insira o experimento' )
+
+                if st.button("Emitir Relatorio"):
+                    create_protocolo()
+                    add_protocolo(input_name)
+                    st.success(f'{input_name} Aguardando envio para parecer !!')
+                    st.info("Vá para o menu de Inicio!!")
+            elif menu == 'Receber Protocolo':
+                st.title('Receber Protocolo')
+                st.subheader('Lista de Protocolos')
+                dados_protocolo = cursor.execute('SELECT nome from protocolo2')
+                clean_db = pd.DataFrame(dados_protocolo, columns=['PROTOCOLOS'])
+                st.selectbox('1.Recomendado', '2.Não Recomendado')
+                st.dataframe(clean_db)
+            
